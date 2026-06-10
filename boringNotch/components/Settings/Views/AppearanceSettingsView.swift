@@ -76,6 +76,18 @@ struct Appearance: View {
                     Text("Additional features")
                 }
             }
+            Section {
+                Defaults.Toggle(key: .claudeIndicatorEnabled) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Show Claude Code activity")
+                        Text("Shows in the notch when Claude Code is working, finished, or needs your input. Requires the Claude Code status hook.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+            } header: {
+                Text("Claude Code")
+            }
         }
         .accentColor(.effectiveAccent)
         .navigationTitle("Appearance")

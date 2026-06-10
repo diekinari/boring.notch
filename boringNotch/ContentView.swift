@@ -20,6 +20,7 @@ struct ContentView: View {
 
     @ObservedObject var coordinator = BoringViewCoordinator.shared
     @ObservedObject var musicManager = MusicManager.shared
+    @ObservedObject var claudeStatus = ClaudeStatusManager.shared
     @ObservedObject var batteryModel = BatteryStatusViewModel.shared
     @ObservedObject var brightnessManager = BrightnessManager.shared
     @ObservedObject var volumeManager = VolumeManager.shared
@@ -331,6 +332,10 @@ struct ContentView: View {
                               gestureProgress: $gestureProgress
                           )
                               .transition(.opacity)
+                      } else if vm.notchState == .closed && Defaults[.claudeIndicatorEnabled] && claudeStatus.state != .off && !vm.hideOnClosed && (claudeStatus.state == .needsInput || !(musicManager.isPlaying || !musicManager.isPlayerIdle)) {
+                          ClaudeLiveActivity()
+                              .frame(alignment: .center)
+                              .transition(.scale(scale: 0.85, anchor: .center).combined(with: .opacity))
                       } else if (!coordinator.expandingView.show || coordinator.expandingView.type == .music) && vm.notchState == .closed && (musicManager.isPlaying || !musicManager.isPlayerIdle) && coordinator.musicLiveActivityEnabled && !vm.hideOnClosed {
                           MusicLiveActivity()
                               .frame(alignment: .center)
@@ -429,6 +434,39 @@ struct ContentView: View {
             height: displayClosedNotchHeight,
             alignment: .center
         )
+    }
+
+    @ViewBuilder
+    func ClaudeLiveActivity() -> some View {
+        HStack(spacing: 0) {
+            // Left: Claude icon (occupies the album-art slot of the closed notch).
+            let baseArtSize = displayClosedNotchHeight - 12
+            let scaledArtSize: CGFloat = {
+                if let scale = cornerRadiusScaleFactor {
+                    return displayClosedNotchHeight - 12 * scale
+                }
+                return baseArtSize
+            }()
+
+            Image("claudeIcon")
+                .resizable()
+                .renderingMode(.original)
+                .aspectRatio(contentMode: .fit)
+                .frame(width: scaledArtSize, height: scaledArtSize)
+
+            // Center: the physical notch gap.
+            Rectangle()
+                .fill(.black)
+                .frame(width: vm.closedNotchSize.width - 4 + (2 * liveActivityEdgeMargin))
+
+            // Right: animated status glyph.
+            HStack {
+                ClaudeStatusIndicator(state: claudeStatus.state)
+            }
+            .frame(width: 24, alignment: .center)
+        }
+        .frame(height: displayClosedNotchHeight, alignment: .center)
+        .animation(.smooth(duration: 0.3), value: claudeStatus.state)
     }
 
     @ViewBuilder
