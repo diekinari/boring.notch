@@ -29,8 +29,8 @@ final class AudioCaptureManager: ObservableObject {
     private static let ringCapacity = 4096
     private static let fftIntervalMilliseconds = 33
     private static let fftLeewayMilliseconds = 0
-    private static let floorDB: Float = -58
-    private static let ceilDB: Float = -14
+    private static let floorDB: Float = -54
+    private static let ceilDB: Float = -24
     private static let referenceHz: Double = 1000
     private static let pinkCompensationSlopePerOctave: Double = 3.0
     private static let fftQueueKey = DispatchSpecificKey<Void>()
